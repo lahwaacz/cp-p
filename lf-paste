@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# To be used only for the `lf` file manager:
+# 1. cp-p and mv-p must be on $PATH
+# 2. Add 'cmd paste &lf-paste $id' to ~/.config/lf/lfrc
+
+# get the ID of the lf process to communicate with
+id="$1"
+
+# read the mode and list of source files
+set -- $(cat "$XDG_DATA_HOME/lf/files")
+mode="$1"
+shift
+
+# check if there are source files
+if [ -z "$@" ]; then
+    lf -remote "send $id echoerr Nothing to paste"
+    exit 0
+fi
+
+# determine the command
+case "$mode" in
+    copy) cmd="cp-p" ;;
+    move) cmd="mv-p" ;;
+esac
+
+# run the copy/move
+$cmd -t . -- "$@" 2>&1 | \
+    while read -r line; do
+        lf -remote "send $id echo $line"
+    done
+
+# clear and reload lf
+lf -remote 'send clear'
+lf -remote 'send load'
+
+green=$'\u001b[32m'
+reset=$'\u001b[0m'
+case "$mode" in
+    copy) lf -remote "send $id echo ${green}Copied!${reset}" ;;
+    move) lf -remote "send $id echo ${green}Moved!${reset}" ;;
+esac
