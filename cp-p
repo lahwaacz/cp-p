@@ -128,7 +128,7 @@ main()
 
     for src in "${srcs[@]}"; do
         if [ ! -e "$src" ]; then
-            echo "$cmd: cannot stat 'foo': No such file or directory" >&2
+            echo "$cmd: cannot stat '$src': No such file or directory" >&2
             exit 1
         fi
         src_sizes["$src"]=$(du -sb -- "$src" | awk '{print $1}')
