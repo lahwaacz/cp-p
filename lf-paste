@@ -8,9 +8,8 @@
 id="$1"
 
 # read the mode and list of source files
-set -- $(cat "$XDG_DATA_HOME/lf/files")
-mode="$1"
-shift
+mode="$(head -n1 "$XDG_DATA_HOME/lf/files")"
+readarray -t -s 1 files < "$XDG_DATA_HOME/lf/files"
 
 # check if there are source files
 if [ -z "$@" ]; then
@@ -25,7 +24,7 @@ case "$mode" in
 esac
 
 # run the copy/move
-$cmd -t . -- "$@" 2>&1 | \
+$cmd -t . -- "${files[@]}" 2>&1 | \
     while read -r line; do
         lf -remote "send $id echo $line"
     done
